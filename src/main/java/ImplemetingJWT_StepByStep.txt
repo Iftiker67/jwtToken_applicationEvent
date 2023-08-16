@@ -1,0 +1,30 @@
+1) Add Dependency(io.jsonwebtoken) [Google "jwt maven"]
+2) Create JWTauthenticationEntryPoint implements AuthenticationEntryPoint
+3) Create JWTTokenHelper /JwtUtil
+4) JwtAutenticationFilter extends OnceRequestFilter
+
+5) Create JwtAuthResponse
+6) Configure Jwt in  spring security config
+7) Create login api to return token
+8) test
+
+ADD this dependencies too (JAXB) in java upper version of jdk8 its missing
+        <dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.2.7</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.2.5-b10</version>
+		</dependency>
+
+
+add this application.properties to ignore
+{ The dependencies of some of the beans in the application context form a cycle:}
+circular dependency
+
+#spring.main.allow-circular-references=true
+
+
