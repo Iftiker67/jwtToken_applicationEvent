@@ -2,6 +2,7 @@ package jwt.token.JWTtoken.controller.event;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jwt.token.JWTtoken.DAO.UserDao;
+import jwt.token.JWTtoken.models.PasswordModel;
 import jwt.token.JWTtoken.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
@@ -36,5 +37,21 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Verified");
     }
 
+    @GetMapping("/resetPassword")
+    public ResponseEntity<?> resetPassword(@RequestBody String username, HttpServletRequest request){
+        boolean reset = userService.resetPassword(username,request);
+        return reset? ResponseEntity.ok("Send")
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Not send");
+    }
+
+    @PostMapping("/resetPasswordConfirmation")
+    public ResponseEntity<?> resetPasswordConfirmation
+            (@RequestParam("token") String token, @RequestBody PasswordModel passwordModel){
+        boolean passwordReset = userService.validatePasswordResetToken(token,passwordModel);
+        if(passwordReset){
+            return ResponseEntity.status(HttpStatus.OK).body("Password Reset");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Password Not Reset");
+    }
 
 }

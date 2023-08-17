@@ -74,6 +74,8 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST,"/api/event/user").permitAll();
                     auth.requestMatchers(HttpMethod.GET,"/authenticate").permitAll();
                     auth.requestMatchers("/api/event/verifyRegistration").permitAll();
+                    auth.requestMatchers("/api/event/resetPassword").permitAll();
+                    auth.requestMatchers("/api/event/resetPasswordConfirmation").permitAll();
                     auth.requestMatchers(HttpMethod.POST,"/user").permitAll();
                     auth.requestMatchers(HttpMethod.GET,"/admin").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.GET,"/user").hasAuthority("USER");

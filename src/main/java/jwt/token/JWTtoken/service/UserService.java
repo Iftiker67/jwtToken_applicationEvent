@@ -7,10 +7,15 @@ import jwt.token.JWTtoken.converter.UserDAOToUser;
 import jwt.token.JWTtoken.converter.UserToUserDAO;
 import jwt.token.JWTtoken.converter.event.VerificationTokenToVerificationTokenDao;
 import jwt.token.JWTtoken.entity.User;
+import jwt.token.JWTtoken.entity.event.ResetPasswordToken;
 import jwt.token.JWTtoken.entity.event.VerificationToken;
 import jwt.token.JWTtoken.evenCreation.event.CompleteRegestrationEvent;
+import jwt.token.JWTtoken.evenCreation.event.ResetPasswordEvent;
+import jwt.token.JWTtoken.models.PasswordModel;
 import jwt.token.JWTtoken.repo.UserRepo;
+import jwt.token.JWTtoken.repo.event.ResetPasswordTokenRepo;
 import jwt.token.JWTtoken.repo.event.VerificationTokenRepo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpRequest;
@@ -20,9 +25,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class UserService {
 
     @Autowired
@@ -30,6 +37,9 @@ public class UserService {
 
     @Autowired
     private VerificationTokenRepo verificationTokenRepo;
+
+    @Autowired
+    private ResetPasswordTokenRepo resetPasswordTokenRepo;
 
     @Autowired
     private UserDAOToUser userDAOToUser;
@@ -114,5 +124,37 @@ public class UserService {
         }
 
         return verified;
+    }
+
+    public boolean resetPassword(String email, HttpServletRequest request) {
+        System.out.println(email);
+//        User user = userRepo.findByEmail(email).orElseThrow(()->{
+//            throw new RuntimeException("Username Not found");
+//        });
+        Optional<User> optionalUser  = userRepo.findByEmail(email);
+        System.out.println(optionalUser.get());
+        if(optionalUser.isPresent()){
+            publisher.publishEvent(new ResetPasswordEvent(optionalUser.get(),appplicationUrl(request)));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean validatePasswordResetToken(String resetToken, PasswordModel passwordModel) {
+        Optional<ResetPasswordToken> optional=  resetPasswordTokenRepo.findByUuidResetToken(resetToken);
+        if(optional.isPresent()){
+            ResetPasswordToken resetPasswordToken = optional.get();
+
+            if(passwordModel.getEmail().equals(resetPasswordToken.getUser().getEmail())){
+                if( resetPasswordToken.getExprirationTime().getTime() -
+                Calendar.getInstance().getTime().getTime() >0 ) {
+                    User user = resetPasswordToken.getUser();
+                    user.setPassword(passwordEncoder.encode(passwordModel.getNewPassword()));
+                    userRepo.save(user);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
