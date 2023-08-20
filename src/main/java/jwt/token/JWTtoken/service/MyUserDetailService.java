@@ -32,20 +32,14 @@ public class MyUserDetailService implements UserDetailsService {
     }
 
     public UserDetails loadValidUserByUsername(String email){
-        System.out.println("load 1");
         Optional<User> user = null;
-        try{
-            user = userRepo.findByValidUserTrueAndEmail(email);
-        } catch (Exception e){
-            System.out.println("Exception No Such Elelment");
-        }
-        System.out.println("log 2");
-        //System.out.println(user.get());
+        user = userRepo.findByValidUserTrueAndEmail(email);
+
         if(user.isPresent()){
             UserInfo userInfo = new UserInfo(user.get());
             return userInfo;
         }
-        System.out.println("log 3");
+
         throw new UserNameNotFound("Username Not verified");
     }
 }
