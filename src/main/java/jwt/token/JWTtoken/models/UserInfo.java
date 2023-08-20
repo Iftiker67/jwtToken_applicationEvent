@@ -38,7 +38,7 @@ public class UserInfo implements UserDetails {
                                 return new SimpleGrantedAuthority(role.getName().toString());
                                 }).collect(Collectors.toList());
 
-        this.active=true;
+        this.active= user.isValidUser();
     }
 
     @Override

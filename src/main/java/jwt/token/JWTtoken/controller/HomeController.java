@@ -6,6 +6,7 @@ import jwt.token.JWTtoken.config.response.JwtAuthResponse;
 import jwt.token.JWTtoken.config.secuirtyConfig.JwtUtil;
 import jwt.token.JWTtoken.entity.User;
 import jwt.token.JWTtoken.models.UserInfo;
+import jwt.token.JWTtoken.service.MyUserDetailService;
 import jwt.token.JWTtoken.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,7 +67,8 @@ public class HomeController {
             System.out.println(ex);
 
         }
-        UserInfo userDetails = (UserInfo) userDetailsService.loadUserByUsername(jwtAuthRequest.getUserName());
+        UserInfo userDetails = (UserInfo) ((MyUserDetailService)userDetailsService).loadValidUserByUsername(jwtAuthRequest.getUserName());
+
         System.out.println("Home Controller "+userDetails);
         String generatedToken = this.jwtUtil.generateToken(userDetails);
         System.out.println("token: "+generatedToken);

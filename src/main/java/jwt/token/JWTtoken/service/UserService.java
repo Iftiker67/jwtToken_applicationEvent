@@ -1,6 +1,7 @@
 package jwt.token.JWTtoken.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import jwt.token.JWTtoken.DAO.UserDao;
 import jwt.token.JWTtoken.DAO.VerificationTokenDao;
 import jwt.token.JWTtoken.converter.UserDAOToUser;
@@ -18,6 +19,7 @@ import jwt.token.JWTtoken.repo.event.VerificationTokenRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -104,16 +106,19 @@ public class UserService {
         return null;
     }
 
+    @Transactional
+    @Modifying
     public Boolean validateVerificationToken(String token){
         VerificationToken verificationToken = verificationTokenRepo.findByUuidToken(token);
         boolean verified = false;
         if(verificationToken != null){
-            if((Calendar.getInstance().getTime().getSeconds()
-                    - verificationToken.getExprirationTime().getSeconds()) >0 ){
+            if((verificationToken.getExprirationTime().getTime() -
+                    Calendar.getInstance().getTime().getTime()) >0 ){
                 verified = true;
                 User user = verificationToken.getUser();
                 user.setValidUser(true);
                 userRepo.save(user);
+                verificationTokenRepo.delete(verificationToken);
                 return verified;
             }
             else {
@@ -140,6 +145,8 @@ public class UserService {
         return false;
     }
 
+    @Transactional
+    @Modifying
     public boolean validatePasswordResetToken(String resetToken, PasswordModel passwordModel) {
         Optional<ResetPasswordToken> optional=  resetPasswordTokenRepo.findByUuidResetToken(resetToken);
         if(optional.isPresent()){
@@ -151,6 +158,7 @@ public class UserService {
                     User user = resetPasswordToken.getUser();
                     user.setPassword(passwordEncoder.encode(passwordModel.getNewPassword()));
                     userRepo.save(user);
+                    resetPasswordTokenRepo.delete(resetPasswordToken);
                     return true;
                 }
             }
