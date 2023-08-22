@@ -31,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+
 //        get token
         String requestToken = request.getHeader("Authorization");
 //        System.out.println("Token "+requestToken);
@@ -60,7 +61,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //            System.out.println("Token Not carried Bearer token");
 //        }
         //once we get the token, now validate
-        if(userName!=null && SecurityContextHolder.getContext().getAuthentication()==null){
+
+        if(userName!=null && SecurityContextHolder.getContext().getAuthentication() == null){
+            System.out.println("First entry security context");
             UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
             if(userDetails!=null){
                 boolean validate = this.jwtUtil.validateToken(token,userDetails);
@@ -78,6 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
         }
+
         filterChain.doFilter(request,response);
     }
 }

@@ -29,6 +29,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.method.annotation.SessionAttributeMethodArgumentResolver;
@@ -39,6 +40,8 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    public AccessDeniedHandler accessDeniedHandler;
     @Autowired
     public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
@@ -67,7 +70,9 @@ public class SecurityConfig {
         // Set unauthorized requests exception handler
        http = http
                 .exceptionHandling()
-                .authenticationEntryPoint(this.jwtAuthenticationEntryPoint).and();
+                .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler)
+                .and();
 
         http
                 .authorizeHttpRequests(auth->{
